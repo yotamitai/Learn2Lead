@@ -64,6 +64,7 @@ def logicalAnd(a1, a2):
         result[i] = a1[i] * a2[i]
     return result
 
+
 def get_valid_actions(obs, agent):
     w_pos, f_pos, s_pos, t_pos, f_tool, w_action, f_action, answer = obs
 
@@ -83,8 +84,10 @@ def get_valid_actions(obs, agent):
         valid_actions = logicalAnd(valid_actions, tool_valid_actions)
     return valid_actions
 
+
 def never_query(obs, agent):
     return None
+
 
 class FetcherQueryPolicy:
     """
@@ -268,7 +271,7 @@ class FetcherYotamPolicy(FetcherQueryPolicy):
             return self.action_to_goal(f_pos, s_pos[target]), None
         else:
             self.inferred_goals = [i for i in range(len(self.probs)) if
-                                  self.probs[i] == maxElement(self.probs)]
+                                   self.probs[i] == maxElement(self.probs)]
 
         # actions that are optimal even when the goal is unknown
         valid_actions = self.get_relevant_actions(obs)
@@ -319,8 +322,9 @@ class GUI:
         self.tutorial = tutorial
 
         self.num_game_rows = num_rows
-        if "explanation" in condition:
-            num_rows += 1  # -- Yotam: The top row will be the explanations interface.
+        # if "explanation" in condition:
+        #     num_rows += 1  # -- Yotam: The top row will be the explanations interface.
+        num_rows += 1  # -- Yotam: The top row will be the explanations interface.
 
         # Dimensions and sizes
         self.size = self.width, self.height = size
@@ -352,10 +356,23 @@ class GUI:
         self.font = pygame.font.SysFont("lucidaconsole", int(10 * self.height / 1080), bold=True)
 
         # Colors --Yotam
-        self.colors = [list(np.random.choice(range(256), size=3)) for _ in stn_pos]
+        rgb_list = [
+            (0, 255, 0),  # Green
+            (0, 0, 255),  # Blue
+            (255, 255, 0),  # Yellow
+            (0, 255, 255),  # Cyan
+            (255, 0, 255),  # Magenta
+            (192, 192, 192),  # Silver
+            (128, 128, 128)  # Gray
+        ]
+        random.shuffle(rgb_list)
+        # self.colors = [list(np.random.choice(range(256), size=3)) for _ in stn_pos]
+        self.colors = rgb_list[:len(stn_pos)]
 
         # Experiment condition --Yotam
         self.condition = condition
+
+        self.steps = 0
 
         if (self.on_init() == False):
             self.running = False
@@ -372,17 +389,25 @@ class GUI:
         self.running = True
 
     # Rectangular station
-    def render_station(self, color, stn):
+    def render_station(self, color, stn, tool=False, goal=False):
         rect = [self.box_width * stn[0] + self.x_margin,
                 self.box_height * (self.num_rows - 1 - stn[1]) + self.y_margin,
                 self.box_width - (self.x_margin * 2),
                 self.box_height - (self.y_margin * 2)]
-
+        width = 5 if tool else 0
         pygame.draw.rect(
             self.screen,
             color,
-            rect
+            rect,
+            width=width
         )
+        if goal:
+            pygame.draw.rect(
+                self.screen,
+                (255, 0, 0),
+                rect,
+                width=5
+            )
 
     def render_all_stations(self):
         # Worker stations
@@ -390,9 +415,12 @@ class GUI:
             stn = self.stn_pos[i]
             tool = self.tool_pos[i]
             color = self.colors[i]
-            self.render_station(color, stn)
+            if i == self.goal_stn:
+                self.render_station(color, stn, goal=True)
+            else:
+                self.render_station(color, stn)
             self.render_text(str(i + 1), stn[0], stn[1])
-            self.render_station(color, tool)
+            self.render_station(color, tool, tool=True)
             self.render_text("T", tool[0], tool[1])
 
     # Circular agent
@@ -464,18 +492,24 @@ class GUI:
             rect
         )
 
+    def draw_explanation_row(self):
+        self.render_explanation(WHITE)  # Remove old explanation
 
     def draw_explanation(self, condition, inferred_goals=[]):
-        self.render_explanation(WHITE)  # Remove old explanation
-        self.font = pygame.font.SysFont("lucidaconsole", 30)
-        goals = [x+1 for x in inferred_goals]
+        self.font = pygame.font.SysFont("lucidaconsole", 20)
+        goals = [x + 1 for x in inferred_goals]
         self.render_text(f"Explanation: {goals}", 0, self.num_rows - 1)
+
+    def draw_steps(self):
+        self.font = pygame.font.SysFont("lucidaconsole", 20)
+        self.render_text(f"Steps: {self.steps}", self.num_cols - 3, self.num_rows - 1)
 
     def draw_experiment_screen(self):
         self.screen.fill(WHITE)
-        vert_line_start = 0
-        if "explanation" in condition:  # -- Yotam
-            vert_line_start = self.box_height
+        vert_line_start = self.box_height
+        self.draw_explanation_row()
+        self.draw_steps()
+        if "explanation" in condition:
             self.draw_explanation(condition)
 
         self.font = pygame.font.SysFont("lucidaconsole", int(self.height / self.num_cols * 0.35))
@@ -526,7 +560,7 @@ class GUI:
                 self.robot_stay = False
 
             fetcher_color = APRICOT
-            if 'GR' in self.condition and len(inferred_goals)==1:
+            if 'GR' in self.condition and len(inferred_goals) == 1:
                 fetcher_color = self.colors[inferred_goals[0]]
             self.render_agent(self.robot[0], self.robot[1], fetcher_color)
             self.render_text("F", self.robot[0], self.robot[1])
@@ -535,13 +569,13 @@ class GUI:
                 text = "You don't need to go to the Tool station" if self.goal_stn == 0 else "You can pass through stations"
                 self.render_text(text, 0, 5, BLACK)
 
+            self.draw_explanation_row()
+            self.draw_steps()
             # explanation
             if "explanation" in condition:  # -- Yotam
                 self.draw_explanation(condition, inferred_goals)
                 self.font = pygame.font.SysFont("lucidaconsole",
                                                 int(self.height / self.num_cols * 0.35))
-
-
             pygame.display.flip()
 
     # Close pygame when finished
@@ -754,195 +788,232 @@ def write_file(worker_action, fetcher_action, time):
 #     pygame.display.update()
 
 
-def run_exp(condition=False):
-    # Experiments
-    # Num Cols, Num Rows, Stations, Goal, Tool, Worker, Fetcher 
-    exp = [
-        # split
-        [
-            10,
-            6,
-            [[4, 2], [4, 4]],
-            0,
-            [[5, 1], [9, 1]],
-            [0, 3],
-            [7, 1],
-            [600, 600]
-        ],
-        # deceive agent
-        [
-            9,
-            11,
-            [[1, 9], [1, 2], [2, 10], [6, 10]],
-            2,
-            [[8, 0], [6, 0], [8, 6], [6, 7]],
-            [4, 2],
-            [5, 2],
-            [600, 800]
-        ],
-        [
-            5,
-            7,
-            [[2, 5], [2, 6]],
-            1,
-            [[0, 0], [4, 0]],
-            [2, 0],
-            [1, 0],
-            [450, 750]
-        ],
+def run_exp(condition, tutorial=False):
+    """Run the experiment"""
 
-        # ]
-        #     # Legibility test with split stations horizontally
-        #     [
-        #         10,
-        #         6,
-        #         [[4, 2], [4, 4]],
-        #         0,
-        #         [[8, 3], [8, 3]],
-        #         [0, 3],
-        #         [8, 1]
-        #     ],
-        #     [
-        #         10,
-        #         6,
-        #         [[4, 2], [4, 4]],
-        #         1,
-        #         [[8, 3], [8, 3]],
-        #         [0, 3],
-        #         [8, 1]
-        #     ],
-        #     # Legibility test with split stations vertically
-        #     [
-        #         10,
-        #         6,
-        #         [[2, 4], [6, 4]],
-        #         1,
-        #         [[8, 3], [8, 3]],
-        #         [4, 1],
-        #         [8, 1]
-        #     ],
-        #     [
-        #         10,
-        #         6,
-        #         [[2, 4], [6, 4]],
-        #         0,
-        #         [[8, 3], [8, 3]],
-        #         [4, 1],
-        #         [8, 1]
-        #     ],
-        #     # Station at every corner of square, worker in middle
-        #     [
-        #         10,
-        #         6,
-        #         [[3, 0], [7, 0], [3, 4], [7, 4]],
-        #         0,
-        #         [[3, 2], [3, 2], [3, 2], [3, 2]],
-        #         [5, 2],
-        #         [2, 2]
-        #     ],
-        #     [
-        #         10,
-        #         6,
-        #         [[3, 0], [7, 0], [3, 4], [7, 4]],
-        #         3,
-        #         [[3, 2], [3, 2], [3, 2], [3, 2]],
-        #         [5, 2],
-        #         [2, 2]
-        #     ],
-        #     [
-        #         10,
-        #         6,
-        #         [[3, 0], [7, 0], [3, 4], [7, 4]],
-        #         1,
-        #         [[3, 2], [3, 2], [3, 2], [3, 2]],
-        #         [5, 2],
-        #         [2, 2]
-        #     ],
-        #     [
-        #         10,
-        #         6,
-        #         [[3, 0], [7, 0], [3, 4], [7, 4]],
-        #         2,
-        #         [[3, 2], [3, 2], [3, 2], [3, 2]],
-        #         [5, 2],
-        #         [2, 2]
-        #     ],
-        #     # Large experiment with stations at every corner of a rotated square
-        #     [
-        #         15,
-        #         9,
-        #         [[5, 6], [8, 3], [5, 0], [2, 3]],
-        #         1,
-        #         [[8, 5], [8, 5], [8, 5], [8, 5]],
-        #         [5, 3],
-        #         [9, 4]
-        #     ],
-        #     [
-        #         15,
-        #         9,
-        #         [[5, 6], [8, 3], [5, 0], [2, 3]],
-        #         3,
-        #         [[8, 5], [8, 5], [8, 5], [8, 5]],
-        #         [5, 3],
-        #         [9, 4]
-        #     ],
-        #     [
-        #         15,
-        #         9,
-        #         [[5, 6], [8, 3], [5, 0], [2, 3]],
-        #         0,
-        #         [[8, 5], [8, 5], [8, 5], [8, 5]],
-        #         [5, 3],
-        #         [9, 4]
-        #     ],
-        #     [
-        #         15,
-        #         9,
-        #         [[5, 6], [8, 3], [5, 0], [2, 3]],
-        #         2,
-        #         [[8, 5], [8, 5], [8, 5], [8, 5]],
-        #         [5, 3],
-        #         [9, 4]
-        #     ],
-        #     # Simple experiment with station on left and right
-        #     [
-        #         5,
-        #         3,
-        #         [[4, 1], [0, 1]],
-        #         0,
-        #         [[2, 2], [2, 2]],
-        #         [2, 1],
-        #         [1, 2]
-        #     ],
-        #     [
-        #         5,
-        #         3,
-        #         [[4, 1], [0, 1]],
-        #         1,
-        #         [[2, 2], [2, 2]],
-        #         [2, 1],
-        #         [1, 2]
-        #     ],
-        #     # Funky experiment with stations clustered
-        #     [
-        #         10,
-        #         6,
-        #         [[5, 3], [5, 2], [6, 2]],
-        #         0,
-        #         [[8, 3], [8, 3], [8, 3]],
-        #         [0, 3],
-        #         [9, 2]
-        #     ],
-        #     [
-        #         10,
-        #         6,
-        #         [[5, 3], [5, 2], [6, 2]],
-        #         2,
-        #         [[8, 3], [8, 3], [8, 3]],
-        #         [0, 3],
-        #         [9, 2]
-        #     ],
-    ]
+    """ Environments: [Num Cols, Num Rows, Stations, Goal, Tool, Worker, Fetcher] """
+    if tutorial:
+        exp = [
+            # Station at every corner of square, worker in middle (for instructions) - X2
+            [
+                10,
+                6,
+                [[3, 0], [7, 0], [3, 4], [7, 4]],
+                0,
+                [[0, 1], [0, 2], [0, 3], [0, 4]],
+                [5, 2],
+                [2, 2],
+                [600, 600]
+            ],
+            [
+                10,
+                6,
+                [[3, 0], [7, 0], [3, 4], [7, 4]],
+                0,
+                [[0, 1], [0, 2], [0, 3], [0, 4]],
+                [5, 2],
+                [2, 2],
+                [600, 600]
+            ],
+        ]
+    else:
+        exp = [
+            # Station at every corner of square, worker in middle (for instructions)
+            [
+                10,
+                6,
+                [[3, 0], [7, 0], [3, 4], [7, 4]],
+                0,
+                [[0, 1], [0, 2], [0, 3], [0, 4]],
+                [5, 2],
+                [2, 2],
+                [600, 600]
+            ],
+            # # split
+            # [
+            #     10,
+            #     6,
+            #     [[4, 2], [4, 4]],
+            #     0,
+            #     [[5, 1], [9, 1]],
+            #     [0, 3],
+            #     [7, 1],
+            #     [600, 600]
+            # ],
+            # # deceive agent
+            # [
+            #     9,
+            #     11,
+            #     [[1, 9], [1, 2], [2, 10], [6, 10]],
+            #     2,
+            #     [[8, 0], [6, 0], [8, 6], [6, 7]],
+            #     [4, 2],
+            #     [5, 2],
+            #     [600, 800]
+            # ],
+            # [
+            #     5,
+            #     7,
+            #     [[2, 5], [2, 6]],
+            #     1,
+            #     [[0, 0], [4, 0]],
+            #     [2, 0],
+            #     [1, 0],
+            #     [450, 750]
+            # ],
+
+            # ]
+            #     # Legibility test with split stations horizontally
+            #     [
+            #         10,
+            #         6,
+            #         [[4, 2], [4, 4]],
+            #         0,
+            #         [[8, 3], [8, 3]],
+            #         [0, 3],
+            #         [8, 1]
+            #     ],
+            #     [
+            #         10,
+            #         6,
+            #         [[4, 2], [4, 4]],
+            #         1,
+            #         [[8, 3], [8, 3]],
+            #         [0, 3],
+            #         [8, 1]
+            #     ],
+            #     # Legibility test with split stations vertically
+            #     [
+            #         10,
+            #         6,
+            #         [[2, 4], [6, 4]],
+            #         1,
+            #         [[8, 3], [8, 3]],
+            #         [4, 1],
+            #         [8, 1]
+            #     ],
+            #     [
+            #         10,
+            #         6,
+            #         [[2, 4], [6, 4]],
+            #         0,
+            #         [[8, 3], [8, 3]],
+            #         [4, 1],
+            #         [8, 1]
+            #     ],
+            #     # Station at every corner of square, worker in middle
+            #     [
+            #         10,
+            #         6,
+            #         [[3, 0], [7, 0], [3, 4], [7, 4]],
+            #         0,
+            #         [[3, 2], [3, 2], [3, 2], [3, 2]],
+            #         [5, 2],
+            #         [2, 2]
+            #     ],
+            #     [
+            #         10,
+            #         6,
+            #         [[3, 0], [7, 0], [3, 4], [7, 4]],
+            #         3,
+            #         [[3, 2], [3, 2], [3, 2], [3, 2]],
+            #         [5, 2],
+            #         [2, 2]
+            #     ],
+            #     [
+            #         10,
+            #         6,
+            #         [[3, 0], [7, 0], [3, 4], [7, 4]],
+            #         1,
+            #         [[3, 2], [3, 2], [3, 2], [3, 2]],
+            #         [5, 2],
+            #         [2, 2]
+            #     ],
+            #     [
+            #         10,
+            #         6,
+            #         [[3, 0], [7, 0], [3, 4], [7, 4]],
+            #         2,
+            #         [[3, 2], [3, 2], [3, 2], [3, 2]],
+            #         [5, 2],
+            #         [2, 2]
+            #     ],
+            #     # Large experiment with stations at every corner of a rotated square
+            #     [
+            #         15,
+            #         9,
+            #         [[5, 6], [8, 3], [5, 0], [2, 3]],
+            #         1,
+            #         [[8, 5], [8, 5], [8, 5], [8, 5]],
+            #         [5, 3],
+            #         [9, 4]
+            #     ],
+            #     [
+            #         15,
+            #         9,
+            #         [[5, 6], [8, 3], [5, 0], [2, 3]],
+            #         3,
+            #         [[8, 5], [8, 5], [8, 5], [8, 5]],
+            #         [5, 3],
+            #         [9, 4]
+            #     ],
+            #     [
+            #         15,
+            #         9,
+            #         [[5, 6], [8, 3], [5, 0], [2, 3]],
+            #         0,
+            #         [[8, 5], [8, 5], [8, 5], [8, 5]],
+            #         [5, 3],
+            #         [9, 4]
+            #     ],
+            #     [
+            #         15,
+            #         9,
+            #         [[5, 6], [8, 3], [5, 0], [2, 3]],
+            #         2,
+            #         [[8, 5], [8, 5], [8, 5], [8, 5]],
+            #         [5, 3],
+            #         [9, 4]
+            #     ],
+            #     # Simple experiment with station on left and right
+            #     [
+            #         5,
+            #         3,
+            #         [[4, 1], [0, 1]],
+            #         0,
+            #         [[2, 2], [2, 2]],
+            #         [2, 1],
+            #         [1, 2]
+            #     ],
+            #     [
+            #         5,
+            #         3,
+            #         [[4, 1], [0, 1]],
+            #         1,
+            #         [[2, 2], [2, 2]],
+            #         [2, 1],
+            #         [1, 2]
+            #     ],
+            #     # Funky experiment with stations clustered
+            #     [
+            #         10,
+            #         6,
+            #         [[5, 3], [5, 2], [6, 2]],
+            #         0,
+            #         [[8, 3], [8, 3], [8, 3]],
+            #         [0, 3],
+            #         [9, 2]
+            #     ],
+            #     [
+            #         10,
+            #         6,
+            #         [[5, 3], [5, 2], [6, 2]],
+            #         2,
+            #         [[8, 3], [8, 3], [8, 3]],
+            #         [0, 3],
+            #         [9, 2]
+            #     ],
+        ]
 
     num_exp = len(exp)
     exp_ind = [x for x in range(num_exp)]
@@ -987,6 +1058,7 @@ def run_exp(condition=False):
             # Get user action
             t0 = time.time()
             action, worker_pos, fetcher_pos = gui.on_execute(fetcher_move, inferred_goals)
+            gui.steps += 1
             t1 = time.time()
 
             # Escape (backspace button)
@@ -1017,7 +1089,8 @@ def run_exp(condition=False):
             f_obs[5] = action
             f_obs[6] = fetcher_move[0]
 
-        print("done")
+        print(f"done in {gui.steps} steps")
+        gui.steps = 0
 
     print("complete")
     gui.screen.fill(pygame.Color("white"))
@@ -1027,10 +1100,11 @@ def run_exp(condition=False):
 
 if __name__ == '__main__':
     condition = [
-        'GR',
+        # 'GR',
         # 'explanation',
         # 'viable goals'
     ]
 
     # run_tutorial(condition)
+    run_exp(condition, tutorial=True)
     run_exp(condition)
