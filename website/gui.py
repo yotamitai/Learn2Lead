@@ -353,7 +353,7 @@ class GUI:
         self.robot_stay = False
 
         # Font
-        self.font = pygame.font.SysFont("lucidaconsole", int(10 * self.height / 1080), bold=True)
+        self.font = pygame.font.SysFont("lucidaconsole", int(10 * self.height / 1080))
 
         # Colors --Yotam
         rgb_list = [
@@ -379,7 +379,7 @@ class GUI:
 
     def on_init(self):
         # Set screen to windowed size
-        # self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
+        # self.screen =  pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
 
         # Set screen to fullscreen
         self.screen = pygame.display.set_mode(self.size)
@@ -399,14 +399,14 @@ class GUI:
             self.screen,
             color,
             rect,
-            width=width
+            width
         )
         if goal:
             pygame.draw.rect(
                 self.screen,
                 (255, 0, 0),
                 rect,
-                width=5
+                5
             )
 
     def render_all_stations(self):
@@ -441,43 +441,32 @@ class GUI:
 
     # Pause screen
     def draw_pause_screen(self):
-
-        self.font = pygame.font.SysFont("lucidaconsole", int(20 * self.height / 1080))
+        self.font = pygame.font.SysFont("lucidaconsole", 20)
         self.screen.fill(GRAY)
 
-        if self.tutorial:
-            text = self.font.render("Tutorial", True, BLACK)
-            self.screen.blit(text, (self.width / 2 - 30, 10))
-
-            text = self.font.render("Your goal station is number " + str(self.goal_stn + 1), True,
-                                    BLUE)
-            self.screen.blit(text, (self.width / 2 - 100, 40))
-        else:
-
-            text = self.font.render("Your goal station is number " + str(self.goal_stn + 1), True,
-                                    BLUE)
-            self.screen.blit(text, (self.width / 2 - 100, 25))
-
+        strng = "Your goal station is number {}".format(self.goal_stn + 1)
+        text = self.font.render(strng, True, BLUE)
+        self.screen.blit(text, (self.width / 2 - 125, 25))
         text = self.font.render("Tab - Pause/Unpause", True, BLACK)
-        self.screen.blit(text, (self.width / 2 - 75, 75))
+        self.screen.blit(text, (self.width / 2 - 100, 75))
         text = self.font.render("Up - Move up", True, BLACK)
-        self.screen.blit(text, (self.width / 2 - 50, 125))
+        self.screen.blit(text, (self.width / 2 - 75, 125))
         text = self.font.render("Left - Move left", True, BLACK)
-        self.screen.blit(text, (self.width / 2 - 60, 175))
+        self.screen.blit(text, (self.width / 2 - 85, 175))
         text = self.font.render("Down - Move down", True, BLACK)
-        self.screen.blit(text, (self.width / 2 - 75, 225))
+        self.screen.blit(text, (self.width / 2 - 100, 225))
         text = self.font.render("Right - Move right", True, BLACK)
-        self.screen.blit(text, (self.width / 2 - 75, 275))
+        self.screen.blit(text, (self.width / 2 - 100, 275))
         text = self.font.render("Space - Done (press when arrived at station)", True, BLACK)
-        self.screen.blit(text, (self.width / 2 - 150, 325))
+        self.screen.blit(text, (self.width / 2 - 175, 325))
         if NOOP_ALLOWED:
             text = self.font.render("Enter - Stop (don't move)", True, BLACK)
-            self.screen.blit(text, (self.width / 2 - 90, 375))
+            self.screen.blit(text, (self.width / 2 - 115, 375))
             text = self.font.render("Press Tab to go to the experiment screen", True, RED)
-            self.screen.blit(text, (self.width / 2 - 140, 425))
+            self.screen.blit(text, (self.width / 2 - 165, 425))
         else:
             text = self.font.render("Press Tab to go to the experiment screen", True, RED)
-            self.screen.blit(text, (self.width / 2 - 140, 375))
+            self.screen.blit(text, (self.width / 2 - 165, 375))
         pygame.display.flip()
 
     def render_explanation(self, color):
@@ -498,11 +487,11 @@ class GUI:
     def draw_explanation(self, condition, inferred_goals=[]):
         self.font = pygame.font.SysFont("lucidaconsole", 20)
         goals = [x + 1 for x in inferred_goals]
-        self.render_text(f"Explanation: {goals}", 0, self.num_rows - 1)
+        self.render_text("Explanation: {}".format(goals), 0, self.num_rows - 1)
 
     def draw_steps(self):
         self.font = pygame.font.SysFont("lucidaconsole", 20)
-        self.render_text(f"Steps: {self.steps}", self.num_cols - 3, self.num_rows - 1)
+        self.render_text("Steps: {}".format(self.steps), self.num_cols - 3, self.num_rows - 1)
 
     def draw_experiment_screen(self):
         self.screen.fill(WHITE)
@@ -583,17 +572,34 @@ class GUI:
         self.font = pygame.font.SysFont("lucidaconsole", 30)
         self.screen.fill(GRAY)
 
-        text = self.font.render("Thank you for participating", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 150, 100))
-        text = self.font.render("in the experiment!", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 150, 150))
+        text = self.font.render("Thank you for participating!", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 200, 100))
 
-        text = self.font.render("Press the button below to", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 150, 250))
-        text = self.font.render("copy your MTurk code", True, WHITE)
-        self.screen.blit(text, (self.width / 2 - 150, 300))
+        text = self.font.render("Use this code to progress in study:", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 230, 250))
+        text = self.font.render("HzAbxB8F8J#C", True, RED)
+        self.screen.blit(text, (self.width / 2 - 100, 300))
         pygame.display.flip()
         pygame.quit()
+
+    def on_end_level(self):
+        self.font = pygame.font.SysFont("lucidaconsole", 25)
+        self.screen.fill(GRAY)
+        strng = "Task completed in {} steps".format(self.steps)
+        text = self.font.render(strng, True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 150, 100))
+
+        text = self.font.render("Press Tab to continue", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 150, 200))
+        pygame.display.flip()
+
+        #  Wait for TAB to continue to next level
+        while self.running:
+            self.clock.tick()
+            e = pygame.event.wait()
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_TAB:  # Pause / unpause
+                    return
 
     # Move fetcher agent (robot)
     def _move_agent(self, other_agent_move):
@@ -805,16 +811,16 @@ def run_exp(condition, tutorial=False):
                 [2, 2],
                 [600, 600]
             ],
-            [
-                10,
-                6,
-                [[3, 0], [7, 0], [3, 4], [7, 4]],
-                0,
-                [[0, 1], [0, 2], [0, 3], [0, 4]],
-                [5, 2],
-                [2, 2],
-                [600, 600]
-            ],
+            #     [
+            #         10,
+            #         6,
+            #         [[3, 0], [7, 0], [3, 4], [7, 4]],
+            #         0,
+            #         [[0, 1], [0, 2], [0, 3], [0, 4]],
+            #         [5, 2],
+            #         [2, 2],
+            #         [600, 600]
+            #     ],
         ]
     else:
         exp = [
@@ -1089,10 +1095,10 @@ def run_exp(condition, tutorial=False):
             f_obs[5] = action
             f_obs[6] = fetcher_move[0]
 
-        print(f"done in {gui.steps} steps")
+        gui.on_end_level()
+        print("done in {} steps".format(gui.steps))
         gui.steps = 0
 
-    print("complete")
     gui.screen.fill(pygame.Color("white"))
     pygame.display.update()
     gui.on_cleanup()
@@ -1107,4 +1113,4 @@ if __name__ == '__main__':
 
     # run_tutorial(condition)
     run_exp(condition, tutorial=True)
-    run_exp(condition)
+    # run_exp(condition)

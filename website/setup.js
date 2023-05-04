@@ -80,11 +80,11 @@ function getCode(){
 }
 
 function addModal() {
-    $("#mycanvas").css("height", window.innerHeight * 0.95);
-    $("#mycanvas").css("width", window.innerWidth * 0.65);
+    $("#mycanvas").css("height", window.innerHeight * 0.6);
+    $("#mycanvas").css("width", window.innerWidth * 0.4);
     $("#mycanvas").css("margin", "auto");
-    $(Sk.main_canvas).css("height", window.innerHeight * 0.95);
-    $(Sk.main_canvas).css("width", window.innerWidth * 0.65);
+    $(Sk.main_canvas).css("height", window.innerHeight * 0.6);
+    $(Sk.main_canvas).css("width", window.innerWidth * 0.4);
     $(Sk.main_canvas).css("margin", "auto");
     $(Sk.main_canvas).css("border", "1px solid blue");
 
