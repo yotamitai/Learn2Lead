@@ -34,7 +34,7 @@
         Sk.configure({read: builtinRead, output: printString});
 
         // PygameGUI
-        var sourcePath = "experiment.py";
+        var sourcePath = "code.py";
         $.get(sourcePath, function (data) {
             $("#code").val(data); // put python     script in html (plaintext)
 
@@ -45,7 +45,12 @@
             };
             addModal();
 
-            var prog = document.getElementById("code").value;
+            // Capture experiment condition from URL
+            var urlParams = new URLSearchParams(window.location.search);
+            var cond = urlParams.get("cond") || ""; // Get the value of "arg1" parameter, default to empty string if not present
+            var tut = urlParams.get("tut") || ""; // Get the value of "arg2" parameter, default to empty string if not present
+
+            var prog = document.getElementById("code").value + 'run_exp([' + cond + '],' + tut + ')';
 
             // Capture console.log output
             var consoleOutput = "";
@@ -68,10 +73,10 @@
                 }
             }).then(function () {
                 // Save console log to a file
-                var blob = new Blob([consoleOutput], { type: "text/plain" });
+                var blob = new Blob([consoleOutput], {type: "text/plain"});
                 var a = document.createElement("a");
                 a.href = URL.createObjectURL(blob);
-                a.download = "console_log.txt";
+                a.download = "experiment_log-" + cond + tut + ".txt";
                 a.click();
             });
         });
@@ -79,3 +84,5 @@
 </script>
 </body>
 </html>
+
+
