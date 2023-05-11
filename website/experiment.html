@@ -47,10 +47,10 @@
 
             // Capture experiment condition from URL
             var urlParams = new URLSearchParams(window.location.search);
-            var cond = urlParams.get("cond") || ""; // Get the value of "arg1" parameter, default to empty string if not present
+            var cond = urlParams.get("cond") || "NoGR"; // Get the value of "arg1" parameter, default to empty string if not present
             var tut = urlParams.get("tut") || ""; // Get the value of "arg2" parameter, default to empty string if not present
 
-            var prog = document.getElementById("code").value + 'run_exp([' + cond + '],' + tut + ')';
+            var prog = document.getElementById("code").value + 'run_exp("' + cond + '",' + tut + ')';
 
             // Capture console.log output
             var consoleOutput = "";

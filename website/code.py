@@ -20,6 +20,13 @@ ORANGE_YELLOW = (245, 183, 0)
 
 NOOP_ALLOWED = True
 
+"""Experiment Conditions"""
+EXP_CONDS ={
+    "NoGR":  [],
+    "GR":  ['GR'],
+    "VG":  ['GR','explanation','viable goals'],
+}
+
 
 # Replaces np.max
 def maxElement(array):
@@ -570,7 +577,7 @@ class GUI:
         self.font = pygame.font.SysFont("lucidaconsole", 30)
         self.screen.fill(GRAY)
 
-        text = self.font.render("All done :)", True, WHITE)
+        text = self.font.render("Task complete!", True, WHITE)
         self.screen.blit(text, (self.width / 2 - 100, 100))
 
         text = self.font.render("Please upload the downloaded file", True, BLUE)
@@ -700,6 +707,8 @@ def write_file(worker_action, fetcher_action, time):
 
 def run_exp(condition, tutorial=False):
     """Run the experiment"""
+
+    condition = EXP_CONDS[condition]
 
     """ Environments: [Num Cols, Num Rows, Stations, Goal, Tool, Worker, Fetcher] """
     if tutorial:
@@ -945,7 +954,7 @@ def run_exp(condition, tutorial=False):
         # fetcher = FetcherQueryPolicy()
         fetcher = FetcherYotamPolicy(epsilon=0.05)
 
-        # Observation state 
+        # Observation state
         f_obs = [worker_pos, fetcher_pos, stn_pos, tool_pos, None, None, None, None]
         done = False
 
@@ -999,9 +1008,8 @@ def run_exp(condition, tutorial=False):
 
 
 if __name__ == '__main__':
-    condition = [
-        'GR',
-        'explanation',
-        'viable goals'
-    ]
-    # run_exp(condition)
+    # run_exp("NoGR", False)
+
+    print()
+
+
