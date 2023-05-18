@@ -12,6 +12,7 @@
 
 <body>
 <div style="text-align: center; margin-top: 10px; margin-bottom: 10px; font-size: 20px;">
+    <p><b>(Initial loading might take a moment)</b></p>
     <p>Go to the goal station.</p>
     The fetcher is trying to predict where you are going.
 </div>
@@ -47,7 +48,7 @@
 
             // Capture experiment condition from URL
             var urlParams = new URLSearchParams(window.location.search);
-            var cond = urlParams.get("cond") || "NoGR"; // Get the value of "arg1" parameter, default to empty string if not present
+            var cond = urlParams.get("cond") || "NR"; // Get the value of "arg1" parameter, default to empty string if not present
             var tut = urlParams.get("tut") || ""; // Get the value of "arg2" parameter, default to empty string if not present
 
             var prog = document.getElementById("code").value + 'run_exp("' + cond + '",' + tut + ')';

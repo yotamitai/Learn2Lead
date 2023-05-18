@@ -21,10 +21,10 @@ ORANGE_YELLOW = (245, 183, 0)
 NOOP_ALLOWED = True
 
 """Experiment Conditions"""
-EXP_CONDS ={
-    "NoGR":  [],
-    "GR":  ['GR'],
-    "VG":  ['GR','explanation','viable goals'],
+EXP_CONDS = {
+    "NR": [],
+    "GR": ['GR'],
+    "VG": ['GR', 'explanation', 'viable goals'],
 }
 
 
@@ -363,15 +363,15 @@ class GUI:
         # Colors --Yotam
         rgb_list = [
             (0, 255, 0),  # Green
-            (0, 0, 255),  # Blue
             (255, 255, 0),  # Yellow
             (0, 255, 255),  # Cyan
             (255, 0, 255),  # Magenta
             (192, 192, 192),  # Silver
             (128, 128, 128)  # Gray
         ]
-        random.shuffle(rgb_list)
+        # random.shuffle(rgb_list)  # if you want random color assignment
         # self.colors = [list(np.random.choice(range(256), size=3)) for _ in stn_pos]
+        assert len(stn_pos) <= len(rgb_list), "More stations that colors defined"
         self.colors = rgb_list[:len(stn_pos)]
 
         # Experiment condition --Yotam
@@ -1011,5 +1011,3 @@ if __name__ == '__main__':
     # run_exp("NoGR", False)
 
     print()
-
-
