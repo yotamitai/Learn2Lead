@@ -998,10 +998,12 @@ def run_exp(condition, tutorial=False):
             f_obs[5] = action
             f_obs[6] = fetcher_move[0]
 
+        print("done")
         gui.on_end_level()
         print("done in {} steps".format(gui.steps))
         gui.steps = 0
 
+    print("complete")
     gui.screen.fill(pygame.Color("white"))
     pygame.display.update()
     gui.on_cleanup()
