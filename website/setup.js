@@ -51,9 +51,9 @@ function printString(text) {
     } else if (text == "complete"){
         var buttonCode = document.getElementById("code");
         buttonCode.style.display = "inline"
-        var codeText = document.getElementById("codeText");
-        codeText.style.display = "inline"
-        codeText.innerHTML = key
+        // var codeText = document.getElementById("codeText");
+        // codeText.style.display = "inline"
+        // codeText.innerHTML = key
     } else {
         allText += text;
     }
@@ -76,7 +76,7 @@ function getCode(){
 
     document.body.removeChild(textarea);
 
-    alert("You have successfully copied your MTurk code: \n" + key);
+    alert("You have successfully copied your completion code: \n" + key);
 }
 
 function addModal() {

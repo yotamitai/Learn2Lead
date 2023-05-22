@@ -24,7 +24,7 @@ NOOP_ALLOWED = True
 EXP_CONDS = {
     "NR": [],
     "GR": ['GR'],
-    "VG": ['GR', 'explanation', 'viable goals'],
+    "VG": ['explanation', 'viable goals'],
 }
 
 
@@ -339,7 +339,7 @@ class GUI:
         self.box_height = self.height / num_rows
         self.x_margin = self.box_width / 10
         self.y_margin = self.box_height / 10
-        self.radius = self.box_width / 2.5
+        self.radius = self.box_width / 3.2
 
         # Stations
         self.stn_pos = stn_pos
@@ -584,6 +584,10 @@ class GUI:
         self.screen.blit(text, (self.width / 2 - 230, 250))
         text = self.font.render("to the survey to progress", True, BLUE)
         self.screen.blit(text, (self.width / 2 - 230, 300))
+        text = self.font.render("Click on the button below", True, RED)
+        self.screen.blit(text, (self.width / 2 - 230, 400))
+        text = self.font.render("to copy your completion code", True, RED)
+        self.screen.blit(text, (self.width / 2 - 230, 450))
         # text = self.font.render("27384632", True, RED)
         # self.screen.blit(text, (self.width / 2 - 100, 300))
         pygame.display.flip()
@@ -684,7 +688,7 @@ class GUI:
                     action = self.on_event(e)
             else:
                 action = 5
-                time.sleep(0.5)  # yotam added
+                time.sleep(0.2)  # yotam added
             # Got input, return action, worker_pos, and fetcher_pos
             if action != None:
                 self.on_render(inferred_goals)
@@ -716,50 +720,53 @@ def run_exp(condition, tutorial=False):
             # Station at every corner of square, worker in middle (for instructions)
             [
                 10,
-                6,
-                [[3, 0], [7, 0], [3, 4], [7, 4]],
+                10,
+                [[3, 0], [8, 0], [3, 9], [8, 9]],
                 0,
-                [[0, 1], [0, 2], [0, 3], [0, 4]],
-                [5, 2],
-                [2, 2],
+                [[0, 3], [0, 4], [0, 5], [0, 6]],
+                [5, 4],
+                [4, 4],
                 [600, 600]
             ],
         ]
     else:
         exp = [
-            # Station at every corner of square, worker in middle (for instructions)
-            # [
-            #     10,
-            #     6,
-            #     [[3, 0], [7, 0], [3, 4], [7, 4]],
-            #     0,
-            #     [[0, 1], [0, 2], [0, 3], [0, 4]],
-            #     [5, 2],
-            #     [2, 2],
-            #     [600, 600]
-            # ],
             # split
             [
                 10,
-                6,
-                [[4, 2], [4, 4]],
+                10,
+                [[7, 4], [7, 8]],
                 0,
-                [[5, 1], [9, 1]],
-                [0, 3],
-                [7, 1],
+                [[2, 1], [8, 1]],
+                [0, 6],
+                [5, 1],
                 [600, 600]
             ],
-            # # deceive agent
-            # [
-            #     9,
-            #     11,
-            #     [[1, 9], [1, 2], [2, 10], [6, 10]],
-            #     2,
-            #     [[8, 0], [6, 0], [8, 6], [6, 7]],
-            #     [4, 2],
-            #     [5, 2],
-            #     [600, 800]
-            # ],
+
+            # clusters
+            [
+                10,
+                10,
+                [[7, 0], [8, 0], [9, 0], [2, 9], [1, 9], [0, 9]],
+                5,
+                [[3, 3],[5, 4],[5, 3],[5, 2],[3, 2],[3, 4]],
+                [4, 3],
+                [4, 6],
+                [600, 600]
+            ],
+            # deceive agent
+            [
+                10,
+                10,
+                [[1, 8], [1, 2], [2, 9], [6, 9]],
+                2,
+                [[8, 0], [6, 0], [8, 6], [6, 7]],
+                [4, 2],
+                [5, 2],
+                [600, 600]
+            ],
+
+            # no possible improvement scenario
             # [
             #     5,
             #     7,
@@ -768,7 +775,7 @@ def run_exp(condition, tutorial=False):
             #     [[0, 0], [4, 0]],
             #     [2, 0],
             #     [1, 0],
-            #     [450, 750]
+            #     [600, 600]
             # ],
 
             # ]
@@ -926,82 +933,85 @@ def run_exp(condition, tutorial=False):
 
     num_exp = len(exp)
     exp_ind = [x for x in range(num_exp)]
-    random.shuffle(exp_ind)
+    # random.shuffle(exp_ind)
 
     for x in range(num_exp):
         i = exp_ind[x]
         cur_exp = exp[i]
 
-        # Dimensions, stations, and worker/fetcher values
-        cols = cur_exp[0]
-        rows = cur_exp[1]
-        stn_pos = cur_exp[2]
-        goal_stn = cur_exp[3]
-        tool_pos = cur_exp[4]
-        worker_pos = cur_exp[5]
-        fetcher_pos = cur_exp[6]
-        size = cur_exp[7]
+        repetitions = 3
 
-        # Set up pygame gui
-        # width, height = cols*60, rows*60 --Yotam
-        gui = GUI(cols, rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos, False,
-                  condition, size)
-        print("date")  # Prints date to output file
-        print("EXPERIMENT #{num}".format(num=i))
-        print("{0:15} {1:15} {2:15}\n".format("WORKER ACTION", "FETCHER ACTION", "TIME ELAPSED"))
+        for r in range(repetitions):
+            # Dimensions, stations, and worker/fetcher values
+            cols = cur_exp[0]
+            rows = cur_exp[1]
+            stn_pos = cur_exp[2]
+            goal_stn = cur_exp[3]
+            tool_pos = cur_exp[4]
+            worker_pos = cur_exp[5]
+            fetcher_pos = cur_exp[6]
+            size = cur_exp[7]
 
-        # Set up fetcher robot
-        # fetcher = FetcherQueryPolicy()
-        fetcher = FetcherYotamPolicy(epsilon=0.05)
+            # Set up pygame gui
+            # width, height = cols*60, rows*60 --Yotam
+            gui = GUI(cols, rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos, False,
+                      condition, size)
+            print("date")  # Prints date to output file
+            print("EXPERIMENT #{num}".format(num=i))
+            print("{0:15} {1:15} {2:15}\n".format("WORKER ACTION", "FETCHER ACTION", "TIME ELAPSED"))
 
-        # Observation state
-        f_obs = [worker_pos, fetcher_pos, stn_pos, tool_pos, None, None, None, None]
-        done = False
+            # Set up fetcher robot
+            # fetcher = FetcherQueryPolicy()
+            fetcher = FetcherYotamPolicy(epsilon=0.05)
 
-        # Loop actions until expreiment is complete
-        while not done:
-            # Get fetcher move
-            fetcher_move = fetcher(f_obs)
+            # Observation state
+            f_obs = [worker_pos, fetcher_pos, stn_pos, tool_pos, None, None, None, None]
+            done = False
 
-            inferred_goals = fetcher.inferred_goals
-            # Get user action
-            t0 = time.time()
-            action, worker_pos, fetcher_pos = gui.on_execute(fetcher_move, inferred_goals)
-            gui.steps += 1
-            t1 = time.time()
+            # Loop actions until expreiment is complete
+            while not done:
+                # Get fetcher move
+                fetcher_move = fetcher(f_obs)
 
-            # Escape (backspace button)
-            if action == -1:
-                done = True
-                break
+                inferred_goals = fetcher.inferred_goals
+                # Get user action
+                t0 = time.time()
+                action, worker_pos, fetcher_pos = gui.on_execute(fetcher_move, inferred_goals)
+                gui.steps += 1
+                t1 = time.time()
 
-            # Write actions to file
-            write_file(action, fetcher_move[0], t1 - t0)
+                # Escape (backspace button)
+                if action == -1:
+                    done = True
+                    break
 
-            # working and finished
-            if (action == 5 and
-                    fetcher_pos == worker_pos and
-                    gui.pickup_tool == goal_stn and
-                    worker_pos == stn_pos[goal_stn]):
-                done = True
+                # Write actions to file
+                write_file(action, fetcher_move[0], t1 - t0)
 
-            # Move pickup tool
-            if gui.pickup_tool != -1:
-                modified_tool_pos = copy.deepcopy(tool_pos)
-                modified_tool_pos[gui.pickup_tool] = fetcher_pos
-                f_obs[3] = modified_tool_pos
-                f_obs[4] = gui.pickup_tool
+                # working and finished
+                if (action == 5 and
+                        fetcher_pos == worker_pos and
+                        gui.pickup_tool == goal_stn and
+                        worker_pos == stn_pos[goal_stn]):
+                    done = True
 
-            # Modify observation state
-            f_obs[0] = worker_pos
-            f_obs[1] = fetcher_pos
-            f_obs[5] = action
-            f_obs[6] = fetcher_move[0]
+                # Move pickup tool
+                if gui.pickup_tool != -1:
+                    modified_tool_pos = copy.deepcopy(tool_pos)
+                    modified_tool_pos[gui.pickup_tool] = fetcher_pos
+                    f_obs[3] = modified_tool_pos
+                    f_obs[4] = gui.pickup_tool
 
-        print("done")
-        gui.on_end_level()
-        print("done in {} steps".format(gui.steps))
-        gui.steps = 0
+                # Modify observation state
+                f_obs[0] = worker_pos
+                f_obs[1] = fetcher_pos
+                f_obs[5] = action
+                f_obs[6] = fetcher_move[0]
+
+            print("done")
+            gui.on_end_level()
+            print("done in {} steps".format(gui.steps))
+            gui.steps = 0
 
     print("complete")
     gui.screen.fill(pygame.Color("white"))
@@ -1010,6 +1020,6 @@ def run_exp(condition, tutorial=False):
 
 
 if __name__ == '__main__':
-    # run_exp("NoGR", False)
+    # run_exp("VG", 1)
 
     print()
