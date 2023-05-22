@@ -24,7 +24,7 @@ NOOP_ALLOWED = True
 EXP_CONDS = {
     "NR": [],
     "GR": ['GR'],
-    "VG": ['explanation', 'viable goals'],
+    "VG": ['GR', 'explanation', 'viable goals'],
 }
 
 
