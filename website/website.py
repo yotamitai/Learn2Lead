@@ -24,7 +24,7 @@ NOOP_ALLOWED = True
 EXP_CONDS = {
     "NR": [],
     "GR": ['GR'],
-    "VG": ['GR', 'explanation', 'viable goals'],
+    "VG": ['explanation', 'viable goals'],
 }
 
 
@@ -130,6 +130,7 @@ class FetcherQueryPolicy:
         elif w_action == 1:
             for i, stn in enumerate(s_pos):
                 if stn[0] >= self.prev_w_pos[0]:
+                    self.probs[i] *= self._epsilon
                     self.probs[i] *= self._epsilon
         elif w_action == 3:
             for i, stn in enumerate(s_pos):
@@ -504,7 +505,8 @@ class GUI:
         self.draw_explanation_row()
         self.draw_steps()
         if "explanation" in self.condition:
-            self.draw_explanation(self.condition)
+            all_stations = list(range(len(self.stn_pos)))
+            self.draw_explanation(self.condition, inferred_goals=all_stations)
 
         self.font = pygame.font.SysFont("lucidaconsole", int(self.height / self.num_cols * 0.35))
 
@@ -593,15 +595,19 @@ class GUI:
         pygame.display.flip()
         pygame.quit()
 
-    def on_end_level(self):
+    def on_end_level(self, game_best_score):
         self.font = pygame.font.SysFont("lucidaconsole", 25)
         self.screen.fill(GRAY)
         strng = "Task completed in {} steps".format(self.steps)
         text = self.font.render(strng, True, WHITE)
         self.screen.blit(text, (self.width / 2 - 150, 100))
 
-        text = self.font.render("Press Tab to continue", True, WHITE)
+        strng = "Current best score: {} steps".format(game_best_score)
+        text = self.font.render(strng, True, WHITE)
         self.screen.blit(text, (self.width / 2 - 150, 200))
+
+        text = self.font.render("Press Tab to continue", True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 150, 400))
         pygame.display.flip()
 
         #  Wait for TAB to continue to next level
@@ -691,6 +697,7 @@ class GUI:
                 time.sleep(0.2)  # yotam added
             # Got input, return action, worker_pos, and fetcher_pos
             if action != None:
+                self.steps += 1
                 self.on_render(inferred_goals)
                 return action, self.user, self.robot
 
@@ -709,7 +716,7 @@ def write_file(worker_action, fetcher_action, time):
     )
 
 
-def run_exp(condition, tutorial=False):
+def run_exp(condition, tutorial=False, repetitions=4):
     """Run the experiment"""
 
     condition = EXP_CONDS[condition]
@@ -721,11 +728,11 @@ def run_exp(condition, tutorial=False):
             [
                 10,
                 10,
-                [[3, 0], [8, 0], [3, 9], [8, 9]],
+                [[0, 0], [9, 0], [0, 9], [9, 9]],
                 0,
-                [[0, 3], [0, 4], [0, 5], [0, 6]],
+                [[4, 6], [4, 5], [4, 3], [4, 4]],
                 [5, 4],
-                [4, 4],
+                [0, 4],
                 [600, 600]
             ],
         ]
@@ -749,12 +756,23 @@ def run_exp(condition, tutorial=False):
                 10,
                 [[7, 0], [8, 0], [9, 0], [2, 9], [1, 9], [0, 9]],
                 5,
-                [[3, 3],[5, 4],[5, 3],[5, 2],[3, 2],[3, 4]],
+                [[3, 3], [5, 4], [5, 3], [5, 2], [3, 4], [3, 2]],
                 [4, 3],
                 [4, 6],
                 [600, 600]
             ],
-            # deceive agent
+            # deceive agent 1
+            [
+                10,
+                10,
+                [[4, 9], [5, 9], [8, 0], [5, 8]],
+                1,
+                [[9, 0], [0, 9], [0, 8], [9, 1]],
+                [1, 1],
+                [0, 1],
+                [600, 600]
+            ],
+            # deceive agent 2
             [
                 10,
                 10,
@@ -765,6 +783,8 @@ def run_exp(condition, tutorial=False):
                 [5, 2],
                 [600, 600]
             ],
+
+
 
             # no possible improvement scenario
             # [
@@ -939,8 +959,7 @@ def run_exp(condition, tutorial=False):
         i = exp_ind[x]
         cur_exp = exp[i]
 
-        repetitions = 3
-
+        game_best_score = float("inf")
         for r in range(repetitions):
             # Dimensions, stations, and worker/fetcher values
             cols = cur_exp[0]
@@ -958,7 +977,8 @@ def run_exp(condition, tutorial=False):
                       condition, size)
             print("date")  # Prints date to output file
             print("EXPERIMENT #{num}".format(num=i))
-            print("{0:15} {1:15} {2:15}\n".format("WORKER ACTION", "FETCHER ACTION", "TIME ELAPSED"))
+            print("{0:15} {1:15} {2:15}\n".format("WORKER ACTION", "FETCHER ACTION",
+                                                  "TIME ELAPSED"))
 
             # Set up fetcher robot
             # fetcher = FetcherQueryPolicy()
@@ -977,7 +997,6 @@ def run_exp(condition, tutorial=False):
                 # Get user action
                 t0 = time.time()
                 action, worker_pos, fetcher_pos = gui.on_execute(fetcher_move, inferred_goals)
-                gui.steps += 1
                 t1 = time.time()
 
                 # Escape (backspace button)
@@ -1009,7 +1028,8 @@ def run_exp(condition, tutorial=False):
                 f_obs[6] = fetcher_move[0]
 
             print("done")
-            gui.on_end_level()
+            game_best_score = gui.steps if gui.steps < game_best_score else game_best_score
+            gui.on_end_level(game_best_score)
             print("done in {} steps".format(gui.steps))
             gui.steps = 0
 
@@ -1020,6 +1040,6 @@ def run_exp(condition, tutorial=False):
 
 
 if __name__ == '__main__':
-    # run_exp("VG", 1)
+    # run_exp("VG", 1, repetitions=4)
 
     print()
