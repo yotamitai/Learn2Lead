@@ -321,7 +321,7 @@ class FetcherYotamPolicy(FetcherQueryPolicy):
 class GUI:
 
     def __init__(self, num_cols, num_rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos,
-                 tutorial, condition, size):
+                 tutorial, condition, size, current_scenrio, current_repetition):
 
         pygame.init()
         self.running = True
@@ -378,6 +378,8 @@ class GUI:
         # Experiment condition --Yotam
         self.condition = condition
 
+        self.scenario = current_scenrio
+        self.iteration = current_repetition
         self.steps = 0
 
         if (self.on_init() == False):
@@ -449,30 +451,39 @@ class GUI:
     def draw_pause_screen(self):
         self.font = pygame.font.SysFont("lucidaconsole", 20)
         self.screen.fill(GRAY)
-
+        txt_pos_y, txt_pos_x, spacing, = 25, self.width / 2 - 110, 50
+        strng = "Game number {}, iteration number {}".format(self.scenario + 1,
+                                                             self.iteration + 1)
+        text = self.font.render(strng, True, WHITE)
+        self.screen.blit(text, (self.width / 2 - 110, txt_pos_y))
+        txt_pos_y += spacing
         strng = "Your goal station is number {}".format(self.goal_stn + 1)
         text = self.font.render(strng, True, BLUE)
-        self.screen.blit(text, (self.width / 2 - 125, 25))
+        self.screen.blit(text, (txt_pos_x, txt_pos_y))
+        txt_pos_y += spacing
         text = self.font.render("Tab - Pause/Unpause", True, BLACK)
-        self.screen.blit(text, (self.width / 2 - 100, 75))
+        self.screen.blit(text, (txt_pos_x, txt_pos_y))
+        txt_pos_y += spacing
         text = self.font.render("Up - Move up", True, BLACK)
-        self.screen.blit(text, (self.width / 2 - 75, 125))
+        self.screen.blit(text, (txt_pos_x, txt_pos_y))
+        txt_pos_y += spacing
         text = self.font.render("Left - Move left", True, BLACK)
-        self.screen.blit(text, (self.width / 2 - 85, 175))
+        self.screen.blit(text, (txt_pos_x, txt_pos_y))
+        txt_pos_y += spacing
         text = self.font.render("Down - Move down", True, BLACK)
-        self.screen.blit(text, (self.width / 2 - 100, 225))
+        self.screen.blit(text, (txt_pos_x, txt_pos_y))
+        txt_pos_y += spacing
         text = self.font.render("Right - Move right", True, BLACK)
-        self.screen.blit(text, (self.width / 2 - 100, 275))
-        text = self.font.render("Space - Done (press when arrived at station)", True, BLACK)
-        self.screen.blit(text, (self.width / 2 - 175, 325))
-        if NOOP_ALLOWED:
-            text = self.font.render("Enter - Stop (don't move)", True, BLACK)
-            self.screen.blit(text, (self.width / 2 - 115, 375))
-            text = self.font.render("Press Tab to go to the experiment screen", True, RED)
-            self.screen.blit(text, (self.width / 2 - 165, 425))
-        else:
-            text = self.font.render("Press Tab to go to the experiment screen", True, RED)
-            self.screen.blit(text, (self.width / 2 - 165, 375))
+        self.screen.blit(text, (txt_pos_x, txt_pos_y))
+        txt_pos_y += spacing
+        text = self.font.render("Space - Work (at workstation)", True, BLACK)
+        self.screen.blit(text, (txt_pos_x, txt_pos_y))
+        txt_pos_y += spacing
+        text = self.font.render("Enter - Wait (don't move)", True, BLACK)
+        self.screen.blit(text, (txt_pos_x, txt_pos_y))
+        txt_pos_y += spacing
+        text = self.font.render("Press Tab to go to the game", True, RED)
+        self.screen.blit(text, (txt_pos_x, txt_pos_y))
         pygame.display.flip()
 
     def render_explanation(self, color):
@@ -738,6 +749,17 @@ def run_exp(condition, tutorial=False, repetitions=4):
         ]
     else:
         exp = [
+            # start with hard one only one iteration! (deceive agent 2)
+            [
+                10,
+                10,
+                [[4, 9], [5, 9], [8, 0], [5, 8]],
+                1,
+                [[9, 0], [0, 9], [0, 8], [9, 1]],
+                [1, 1],
+                [0, 1],
+                [600, 600]
+            ],
             # split
             [
                 10,
@@ -749,7 +771,6 @@ def run_exp(condition, tutorial=False, repetitions=4):
                 [5, 1],
                 [600, 600]
             ],
-
             # clusters
             [
                 10,
@@ -761,18 +782,18 @@ def run_exp(condition, tutorial=False, repetitions=4):
                 [4, 6],
                 [600, 600]
             ],
-            # deceive agent 1
+            # decive agent 0 -- easy
             [
                 10,
                 10,
-                [[4, 9], [5, 9], [8, 0], [5, 8]],
+                [[4, 8], [4, 9], [6, 9]],
                 1,
-                [[9, 0], [0, 9], [0, 8], [9, 1]],
-                [1, 1],
-                [0, 1],
+                [[0, 0], [9, 0], [9, 1]],
+                [4, 0],
+                [3, 0],
                 [600, 600]
             ],
-            # deceive agent 2
+            # deceive agent 1
             [
                 10,
                 10,
@@ -783,20 +804,17 @@ def run_exp(condition, tutorial=False, repetitions=4):
                 [5, 2],
                 [600, 600]
             ],
-
-
-
-            # no possible improvement scenario
-            # [
-            #     5,
-            #     7,
-            #     [[2, 5], [2, 6]],
-            #     1,
-            #     [[0, 0], [4, 0]],
-            #     [2, 0],
-            #     [1, 0],
-            #     [600, 600]
-            # ],
+            # deceive agent 2
+            [
+                10,
+                10,
+                [[4, 9], [5, 9], [8, 0], [5, 8]],
+                1,
+                [[9, 0], [0, 9], [0, 8], [9, 1]],
+                [1, 1],
+                [0, 1],
+                [600, 600]
+            ],
 
             # ]
             #     # Legibility test with split stations horizontally
@@ -961,6 +979,8 @@ def run_exp(condition, tutorial=False, repetitions=4):
 
         game_best_score = float("inf")
         for r in range(repetitions):
+            if num_exp > 2 and x == 0 and r == 2: break  # first scenario probing condition
+
             # Dimensions, stations, and worker/fetcher values
             cols = cur_exp[0]
             rows = cur_exp[1]
@@ -974,7 +994,7 @@ def run_exp(condition, tutorial=False, repetitions=4):
             # Set up pygame gui
             # width, height = cols*60, rows*60 --Yotam
             gui = GUI(cols, rows, stn_pos, goal_stn, tool_pos, worker_pos, fetcher_pos, False,
-                      condition, size)
+                      condition, size, i, r)
             print("date")  # Prints date to output file
             print("EXPERIMENT #{num}".format(num=i))
             print("{0:15} {1:15} {2:15}\n".format("WORKER ACTION", "FETCHER ACTION",
@@ -1040,6 +1060,6 @@ def run_exp(condition, tutorial=False, repetitions=4):
 
 
 if __name__ == '__main__':
-    # run_exp("VG", 1, repetitions=4)
+    # run_exp("VG", False, repetitions=4)
 
     print()
