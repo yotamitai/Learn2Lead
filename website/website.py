@@ -504,7 +504,7 @@ class GUI:
     def draw_explanation(self, condition, inferred_goals=[]):
         self.font = pygame.font.SysFont("lucidaconsole", 20)
         goals = " ,".join([str(x + 1) for x in inferred_goals])
-        self.render_text("Explanation: {}".format(goals), 0, self.num_rows - 1)
+        self.render_text("Relevant workstations: {}".format(goals), 0, self.num_rows - 1)
 
     def draw_steps(self):
         self.font = pygame.font.SysFont("lucidaconsole", 20)
