@@ -13,13 +13,15 @@
 <body>
 <div style="text-align: center; margin-top: 10px; margin-bottom: 10px; font-size: 20px;">
     <p><b>(Initial loading might take a moment)</b></p>
-    <p>Go to the goal station and press "Done" (space).</p>
+    <p>Reach target workstation and press "Work" (space).</p>
+    <p><b>Remember:</b> A low number of steps can earn you a bonus.</p>
+
 </div>
 <div id="mycanvas"></div>
 <div id="output"></div>
 
 <div>
-<!--    <div id="codeText" style="display:none; margin-left: 40%"></div>-->
+    <!--    <div id="codeText" style="display:none; margin-left: 40%"></div>-->
     <button id="code" style="display: none; height: 40px; width: 100px; margin-left: 50%"
             onclick="getCode()">Get Code
     </button>
@@ -71,19 +73,19 @@
                 } catch (e) {
                     alert(e);
                 }
-            // }).then(function () {
-            //     // Save console log to a file
-            //     var blob = new Blob([consoleOutput], {type: "text/plain"});
-            //     var fileName = ""
-            //      if(tut == ""){
-            //         fileName = "experiment_log-"+ cond + ".txt";
-            //     } else {
-            //         fileName = "practice_log-"+ cond + ".txt";
-            //     }
-            //     var a = document.createElement("a");
-            //     a.href = URL.createObjectURL(blob);
-            //     a.download = fileName;
-            //     a.click();
+                // }).then(function () {
+                //     // Save console log to a file
+                //     var blob = new Blob([consoleOutput], {type: "text/plain"});
+                //     var fileName = ""
+                //      if(tut == ""){
+                //         fileName = "experiment_log-"+ cond + ".txt";
+                //     } else {
+                //         fileName = "practice_log-"+ cond + ".txt";
+                //     }
+                //     var a = document.createElement("a");
+                //     a.href = URL.createObjectURL(blob);
+                //     a.download = fileName;
+                //     a.click();
             });
         });
     });
