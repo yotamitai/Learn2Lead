@@ -1,13 +1,14 @@
 var key = ""
 var allText = ""
 
-function generateKey(){
+function generateKey(cond){
     const length = 16;
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";  
     const charactersLength = characters.length;
     for ( var i = 0; i < length; i++ ) {
         key += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
+    key+='_'+cond
 }
 
 function resetTarget() {

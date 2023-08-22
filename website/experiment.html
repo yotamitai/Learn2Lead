@@ -29,7 +29,12 @@
 
 <script>
     $("document").ready(function () {
-        generateKey();
+        // Capture experiment condition from URL
+        var urlParams = new URLSearchParams(window.location.search);
+        var cond = urlParams.get("cond") || "NR"; // Get the value of "arg1" parameter, default to empty string if not present
+        var tut = urlParams.get("tut") || ""; // Get the value of "arg2" parameter, default to empty string if not present
+
+        generateKey(cond);
         // Configuration for skulpt
         (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target =
             "mycanvas";
@@ -46,11 +51,6 @@
                 $(".modal").modal("hide");
             };
             addModal();
-
-            // Capture experiment condition from URL
-            var urlParams = new URLSearchParams(window.location.search);
-            var cond = urlParams.get("cond") || "NR"; // Get the value of "arg1" parameter, default to empty string if not present
-            var tut = urlParams.get("tut") || ""; // Get the value of "arg2" parameter, default to empty string if not present
 
             var prog = document.getElementById("code").value + 'run_exp("' + cond + '","' + tut + '")';
 

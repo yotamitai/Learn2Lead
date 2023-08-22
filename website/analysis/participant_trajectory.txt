@@ -1,0 +1,25 @@
+03/07/2023 16:26:00
+EXPERIMENT #2
+WORKER ACTION   FETCHER ACTION  TIME ELAPSED
+
+LEFT            DOWN            6.622300
+LEFT            DOWN            0.337900
+LEFT            NOOP            0.690000
+UP              LEFT            0.313100
+UP              NOOP            0.202000
+UP              NOOP            0.168100
+UP              NOOP            0.188400
+LEFT            NOOP            0.167700
+UP              DOWN            0.220900
+UP              DOWN            0.274900
+WORK            PICKUP          0.376100
+WORK            LEFT            0.245500
+WORK            UP              0.252900
+WORK            LEFT            0.230300
+WORK            LEFT            0.217600
+WORK            UP              0.222400
+WORK            UP              0.240800
+WORK            UP              0.235900
+WORK            UP              0.229700
+WORK            UP              0.234100
+WORK            UP              0.237900
