@@ -294,7 +294,6 @@ class FetcherQueryPolicy:
             for i, stn in enumerate(s_pos):
                 if stn[0] >= self.prev_w_pos[0]:
                     self.probs[i] *= self._epsilon
-                    self.probs[i] *= self._epsilon
         elif w_action == 3:
             for i, stn in enumerate(s_pos):
                 if stn[1] >= self.prev_w_pos[1]:
