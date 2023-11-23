@@ -26,6 +26,7 @@ EXP_CONDS = {
     "GR": ['GR'],
     "VG": ['explanation', 'viable goals'],
 }
+
 EXPERIMENTS = {
     "split": [
         10, 10,
@@ -193,6 +194,7 @@ class FetcherQueryPolicy:
         elif w_action == 1:
             for i, stn in enumerate(s_pos):
                 if stn[0] >= self.prev_w_pos[0]:
+                    self.probs[i] *= self._epsilon
                     self.probs[i] *= self._epsilon
         elif w_action == 3:
             for i, stn in enumerate(s_pos):
@@ -884,5 +886,6 @@ def run_exp(condition, tutorial=False):
 
 
 if __name__ == '__main__':
-    # run_exp("VG", False)
+    # run_exp("NR", False)
+
     print()
