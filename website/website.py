@@ -494,10 +494,14 @@ class GUI:
             self.render_text("T", tool[0], tool[1])
 
     # Circular agent
-    def render_agent(self, circle_x, circle_y, color):
+    def render_agent(self, circle_x, circle_y, color, tool_color=False):
         gui_x = circle_x * self.box_width + (self.box_width / 2)
         gui_y = (self.num_rows - 1 - circle_y) * self.box_height + (self.box_height / 2)
         pygame.draw.circle(self.screen, color, (int(gui_x), int(gui_y)), int(self.radius))
+        if tool_color:
+            start_x, end_x = circle_x * self.box_width, (circle_x + 1) * self.box_width
+            pygame.draw.line(self.screen, tool_color, (start_x + 20, gui_y + 10),
+                             (end_x - 20, gui_y + 10), width=4)
 
     # Text within station or agent
     def render_text(self, textString, box_x, box_y, color=BLACK):
@@ -630,7 +634,17 @@ class GUI:
             fetcher_color = APRICOT
             if 'GR' in self.condition and len(inferred_goals) == 1:
                 fetcher_color = self.colors[inferred_goals[0]]
-            self.render_agent(self.robot[0], self.robot[1], fetcher_color)
+
+            if self.pickup_tool != -1:
+                if [self.pickup_tool] != inferred_goals:
+                    self.pickup_tool = -1
+                    self.render_agent(self.robot[0], self.robot[1], fetcher_color)
+                else:
+                    tool_color = self.colors[inferred_goals[0]]
+                    self.render_agent(self.robot[0], self.robot[1], fetcher_color, tool_color)
+            else:
+                self.render_agent(self.robot[0], self.robot[1], fetcher_color)
+
             self.render_text("F", self.robot[0], self.robot[1])
 
             if self.tutorial:
