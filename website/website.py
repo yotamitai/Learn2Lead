@@ -835,13 +835,14 @@ def run_exp(condition, tutorial=False):
             while not done:
                 # Get fetcher move
                 fetcher_move = fetcher(f_obs)
-
                 inferred_goals = fetcher.inferred_goals
+
+                gui.on_render(inferred_goals)
+
                 # Get user action
                 t0 = time.time()
                 action, worker_pos, fetcher_pos = gui.on_execute(fetcher_move, inferred_goals)
                 t1 = time.time()
-
                 # Escape (backspace button)
                 if action == -1:
                     done = True
@@ -884,5 +885,5 @@ def run_exp(condition, tutorial=False):
 
 
 if __name__ == '__main__':
-    # run_exp("VG", False)
+    run_exp("VG", False)
     print()
