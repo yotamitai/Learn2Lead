@@ -418,6 +418,7 @@ class GUI:
         self.robot = [fetcher_pos[0], fetcher_pos[1]]
         self.prev_robot = [fetcher_pos[0], fetcher_pos[1]]
         self.pickup_tool = -1
+        self.holding_tool = None
         self.robot_stay = False
 
         # Font
@@ -635,13 +636,8 @@ class GUI:
             if 'GR' in self.condition and len(inferred_goals) == 1:
                 fetcher_color = self.colors[inferred_goals[0]]
 
-            if self.pickup_tool != -1:
-                if [self.pickup_tool] != inferred_goals:
-                    self.pickup_tool = -1
-                    self.render_agent(self.robot[0], self.robot[1], fetcher_color)
-                else:
-                    tool_color = self.colors[inferred_goals[0]]
-                    self.render_agent(self.robot[0], self.robot[1], fetcher_color, tool_color)
+            if self.holding_tool:
+                self.render_agent(self.robot[0], self.robot[1], fetcher_color, self.holding_tool)
             else:
                 self.render_agent(self.robot[0], self.robot[1], fetcher_color)
 
@@ -711,7 +707,7 @@ class GUI:
                     return
 
     # Move fetcher agent (robot)
-    def _move_agent(self, other_agent_move):
+    def _move_agent(self, other_agent_move,inferred_goals):
         self.prev_robot[0] = self.robot[0]
         self.prev_robot[1] = self.robot[1]
         move = other_agent_move[0]
@@ -729,6 +725,7 @@ class GUI:
             self.robot_stay = True
         elif move == 6:  # pickup
             self.pickup_tool = other_agent_move[1]
+            self.holding_tool = self.colors[inferred_goals[0]]
         # else:
         #     print("move agent 5")
 
@@ -774,7 +771,7 @@ class GUI:
 
     # Move fetcher and get user action
     def on_execute(self, other_agent_move, inferred_goals):
-        self._move_agent(other_agent_move)
+        self._move_agent(other_agent_move, inferred_goals)
         action = None
 
         while self.running:
