@@ -501,8 +501,9 @@ class GUI:
         pygame.draw.circle(self.screen, color, (int(gui_x), int(gui_y)), int(self.radius))
         if tool_color:
             start_x, end_x = circle_x * self.box_width, (circle_x + 1) * self.box_width
-            pygame.draw.line(self.screen, tool_color, (start_x + 20, gui_y + 10),
-                             (end_x - 20, gui_y + 10), width=4)
+            for i in range(-1,2):
+                pygame.draw.line(self.screen, tool_color, (start_x + 20, gui_y + 10+i),
+                                (end_x - 20, gui_y + 10+i))
 
     # Text within station or agent
     def render_text(self, textString, box_x, box_y, color=BLACK):
