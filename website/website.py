@@ -897,5 +897,5 @@ def run_exp(condition, tutorial=False):
 
 
 if __name__ == '__main__':
-    run_exp("VG", False)
+    # run_exp("VG", False)
     print()
