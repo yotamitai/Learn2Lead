@@ -24,10 +24,10 @@
                     <div class="col">
                         <p style="margin-top: 5%">
                             There are two players in this game: “worker” and “fetcher”.<br>
-                            The goal of the worker is to go to the correct numbered workstation
+                            The goal of the worker is to go to the correct numbered station
                             (<b>red frame</b>).<br>
-                            The goal of the fetcher to go to relevant toolstation and then
-                            go to the worker’s station.
+                            The goal of the fetcher is to go to the corresponding colored toolbox
+                            (labeled T), obtain the tool, and then go to the worker’s station.
                         </p>
                         <p>
                             A given scenario will look similar to the image on the right:
@@ -41,21 +41,15 @@
         </div>
 
         <p style="margin-top: 5%; margin-left: 10%; margin-right: 10%; text-align: justify">
-            <b>Important:</b> The fetcher does not know the worker's goal and will need to infer
-            it
-            based on the worker's actions.
+            <b>Remember:</b> The fetcher does not know the worker's goal and will need to infer
+            it based on the worker's actions.
             <br>
             <br>
-            You will play the role of the worker: the circular yellow agent, labelled “W”.
-            Your goal is to move to the goal station and press the “Done” button once you’ve
-            reached it.
+            <b>You control the worker:</b> the circular blue agent, labelled “W”.
             <br>
             <br>
-            <b>
-                Your main objective should be to act in such a way that the fetcher can figure
-                out what you goal is at the earliest possible timestep. That way, the fetcher
-                will know as soon as possible what tool to fetch.
-            </b>
+            <b>Your main objective</b> should be to act in such a way that the fetcher joins you
+                at the goal station with a <b>MINIMAL</b> number of steps.
             <br>
             <br>
         </p>
@@ -80,7 +74,7 @@
                             <br>
                             Right - Move right
                             <br>
-                            Space - Work (press when reaching desired workstation)
+                            Space - Work (press when reaching the goal station)
                             <br>
                             Enter - Wait (don't move for one turn)
                         </p>

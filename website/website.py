@@ -70,7 +70,7 @@ EXPERIMENTS = {
 }
 TUTORIALS = {
     # Station at every corner of square, worker in middle (for instructions)
-    "tutorial": [
+    "1": [
         10, 10,
         [[0, 0], [9, 0], [0, 9], [9, 9]],
         0,
@@ -79,7 +79,7 @@ TUTORIALS = {
         [0, 4],
         [600, 600],
         17, ],
-    "deceive-0": [
+    "2": [
         10, 10,
         [[4, 8], [4, 9], [6, 9]],
         1,
@@ -426,7 +426,7 @@ class GUI:
 
         # Colors --Yotam
         rgb_list = [
-            (0, 255, 0),  # Green
+            GREEN,  # Green
             (255, 255, 0),  # Yellow
             (0, 255, 255),  # Cyan
             (255, 0, 255),  # Magenta
@@ -501,9 +501,9 @@ class GUI:
         pygame.draw.circle(self.screen, color, (int(gui_x), int(gui_y)), int(self.radius))
         if tool_color:
             start_x, end_x = circle_x * self.box_width, (circle_x + 1) * self.box_width
-            for i in range(-1,2):
-                pygame.draw.line(self.screen, tool_color, (start_x + 20, gui_y + 10+i),
-                                (end_x - 20, gui_y + 10+i))
+            for i in range(-1, 3):
+                pygame.draw.line(self.screen, tool_color, (start_x + 20, gui_y + 10 + i),
+                                 (end_x - 20, gui_y + 10 + i))
 
     # Text within station or agent
     def render_text(self, textString, box_x, box_y, color=BLACK):
@@ -524,7 +524,7 @@ class GUI:
         text = self.font.render(strng, True, WHITE)
         self.screen.blit(text, (self.width / 2 - 110, txt_pos_y))
         txt_pos_y += spacing
-        strng = "Target workstation is number {}".format(self.goal_stn + 1)
+        strng = "goal station is number {}".format(self.goal_stn + 1)
         text = self.font.render(strng, True, BLUE)
         self.screen.blit(text, (txt_pos_x, txt_pos_y))
         txt_pos_y += spacing
@@ -543,7 +543,7 @@ class GUI:
         text = self.font.render("Right - Move right", True, BLACK)
         self.screen.blit(text, (txt_pos_x, txt_pos_y))
         txt_pos_y += spacing
-        text = self.font.render("Space - Work (at workstation)", True, BLACK)
+        text = self.font.render("Space - Work (at station)", True, BLACK)
         self.screen.blit(text, (txt_pos_x, txt_pos_y))
         txt_pos_y += spacing
         text = self.font.render("Enter - Wait (don't move)", True, BLACK)
@@ -571,7 +571,7 @@ class GUI:
     def draw_explanation(self, condition, inferred_goals=[]):
         self.font = pygame.font.SysFont("lucidaconsole", 20)
         goals = " ,".join([str(x + 1) for x in inferred_goals])
-        self.render_text("Relevant workstations: {}".format(goals), 0, self.num_rows - 1)
+        self.render_text("Relevant stations: {}".format(goals), 0, self.num_rows - 1)
 
     def draw_steps(self):
         self.font = pygame.font.SysFont("lucidaconsole", 20)
@@ -603,17 +603,16 @@ class GUI:
         self.render_all_stations()
 
         # Worker
-        self.render_agent(self.prev_user[0], self.prev_user[1], ORANGE_YELLOW)
+        self.render_agent(self.prev_user[0], self.prev_user[1], BLUE)
         self.render_text("W", self.prev_user[0], self.prev_user[1])
 
         # Fetcher
-        self.render_agent(self.prev_robot[0], self.prev_robot[1],
-                          APRICOT)
+        self.render_agent(self.prev_robot[0], self.prev_robot[1], GRAY)
         self.render_text("F", self.prev_robot[0], self.prev_robot[1])
 
         # Tutorial Text
         if self.tutorial:
-            text = "You don't need to go to the Tool station" if self.goal_stn == 0 else "You can pass through stations"
+            text = "You don't need to go to the toolbox" if self.goal_stn == 0 else "You can move through stations"
             self.render_text(text, 0, 5, BLACK)
         pygame.display.flip()
 
@@ -626,14 +625,14 @@ class GUI:
             self.render_all_stations()  # If agent overlay
 
             # User
-            self.render_agent(self.user[0], self.user[1], ORANGE_YELLOW)
+            self.render_agent(self.user[0], self.user[1], BLUE)
             self.render_text("W", self.user[0], self.user[1])
 
             # Robot
             if self.robot_stay:
                 self.robot_stay = False
 
-            fetcher_color = APRICOT
+            fetcher_color = GRAY
             if 'GR' in self.condition and len(inferred_goals) == 1:
                 fetcher_color = self.colors[inferred_goals[0]]
 
@@ -690,6 +689,10 @@ class GUI:
             strng = "Completed in optimal number of steps: {}".format(optimal)
             text = self.font.render(strng, True, WHITE)
             self.screen.blit(text, (self.width / 2 - 250, 200))
+        else:
+            strng = "Current best score: {}".format(game_best_score)
+            text = self.font.render(strng, True, WHITE)
+            self.screen.blit(text, (self.width / 2 - 150, 200))
 
         text = self.font.render("Press Tab to continue", True, WHITE)
         self.screen.blit(text, (self.width / 2 - 150, 400))
@@ -708,7 +711,7 @@ class GUI:
                     return
 
     # Move fetcher agent (robot)
-    def _move_agent(self, other_agent_move,inferred_goals):
+    def _move_agent(self, other_agent_move, inferred_goals):
         self.prev_robot[0] = self.robot[0]
         self.prev_robot[1] = self.robot[1]
         move = other_agent_move[0]
@@ -812,7 +815,8 @@ def run_exp(condition, tutorial=False):
     condition = EXP_CONDS[condition]
     repetitions = 3
     """ Environments: [Num Cols, Num Rows, Stations, Goal, Tool, Worker, Fetcher] """
-    exp = TUTORIALS if tutorial else EXPERIMENTS
+    exp = {"tutorial_"+tutorial: TUTORIALS[tutorial]} if tutorial else EXPERIMENTS
+
     for i, scenario in enumerate(exp.items()):
         scenario_name, scenario_values = scenario
         game_best_score = float("inf")
@@ -897,5 +901,5 @@ def run_exp(condition, tutorial=False):
 
 
 if __name__ == '__main__':
-    # run_exp("VG", False)
+    # run_exp("VG", "2")
     print()
