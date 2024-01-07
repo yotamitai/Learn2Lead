@@ -159,6 +159,8 @@ def never_query(obs, agent):
     return None
 
 
+
+
 class FetcherQueryPolicy:
     """
     Basic Fetcher Policy for querying, follows query_policy function argument (defaults to never query)
@@ -256,6 +258,8 @@ class FetcherQueryPolicy:
             return self.action_to_goal(f_pos, s_pos[maxIndex(self.probs)]), None
 
 
+
+
 class FetcherAltPolicy(FetcherQueryPolicy):
     """
     More Complicated Fetcher Policy, allows for multiple tool locations
@@ -309,6 +313,8 @@ class FetcherAltPolicy(FetcherQueryPolicy):
             return action_idx, None
         else:
             return 4, None
+
+
 
 
 class FetcherYotamPolicy(FetcherQueryPolicy):
@@ -377,7 +383,7 @@ class FetcherYotamPolicy(FetcherQueryPolicy):
             if f_pos[1] <= t_pos[stn][1]:
                 tool_valid_actions[3] = 0  # Up
             valid_actions = logicalAnd(valid_actions, tool_valid_actions)
-        return valid_actions
+        return valid_actions   
 
 
 class GUI:
@@ -577,6 +583,28 @@ class GUI:
         self.font = pygame.font.SysFont("lucidaconsole", 20)
         self.render_text("Steps: {}".format(self.steps), self.num_cols - 3, self.num_rows - 1)
 
+    # Button
+    def render_button(self):
+        x = 200
+        y = 200
+        width = 100
+        height = 50
+        color = (255, 0, 0)
+        text = "Reveal" 
+        # Draw the button
+        pygame.draw.rect(color, (x, y, width, height), 0)
+        font = pygame.font.SysFont('comicsans', 60)
+        text = font.render(self.text, 1, (0,0,0))
+        self.screen.blit(text, (self.x + round(self.width/2) - round(text.get_width()/2),
+                        self.y + round(self.height/2) - round(text.get_height()/2)))
+
+    def is_over_button(self, pos):
+        # Pos is the mouse position or a tuple of (x,y) coordinates
+        if pos[0] > self.x and pos[0] < self.x + self.width:
+            if pos[1] > self.y and pos[1] < self.y + self.height:
+                return True
+        return False
+
     def draw_experiment_screen(self):
         self.screen.fill(WHITE)
         vert_line_start = self.box_height
@@ -614,6 +642,11 @@ class GUI:
         if self.tutorial:
             text = "You don't need to go to the toolbox" if self.goal_stn == 0 else "You can move through stations"
             self.render_text(text, 0, 5, BLACK)
+        
+        # button
+        
+
+            
         pygame.display.flip()
 
     # Render drawing
@@ -654,6 +687,9 @@ class GUI:
                 self.draw_explanation(self.condition, inferred_goals)
                 self.font = pygame.font.SysFont("lucidaconsole",
                                                 int(self.height / self.num_cols * 0.35))
+                
+            # draw button
+                # self.button.draw()    
             pygame.display.flip()
 
     # Close pygame when finished
@@ -785,6 +821,12 @@ class GUI:
                 e = pygame.event.wait()
                 if e.type == pygame.KEYDOWN:
                     action = self.on_event(e)
+
+                # pos = pygame.mouse.get_pos()
+                # if e.type == pygame.MOUSEBUTTONDOWN:
+                #     if self.button.is_over(pos):
+                #         print("Button Clicked!")
+                             
             else:
                 action = 5
                 time.sleep(0.2)  # yotam added
@@ -901,5 +943,5 @@ def run_exp(condition, tutorial=False):
 
 
 if __name__ == '__main__':
-    # run_exp("VG", "2")
+    run_exp("VG", "2")
     print()
