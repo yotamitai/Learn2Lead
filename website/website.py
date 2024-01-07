@@ -25,6 +25,7 @@ EXP_CONDS = {
     "NR": [],
     "GR": ['GR'],
     "VG": ['explanation', 'viable goals'],
+    "VG_od": ['explanation', 'viable goals', "button"],
 }
 EXPERIMENTS = {
     "split": [
@@ -159,8 +160,6 @@ def never_query(obs, agent):
     return None
 
 
-
-
 class FetcherQueryPolicy:
     """
     Basic Fetcher Policy for querying, follows query_policy function argument (defaults to never query)
@@ -258,8 +257,6 @@ class FetcherQueryPolicy:
             return self.action_to_goal(f_pos, s_pos[maxIndex(self.probs)]), None
 
 
-
-
 class FetcherAltPolicy(FetcherQueryPolicy):
     """
     More Complicated Fetcher Policy, allows for multiple tool locations
@@ -313,8 +310,6 @@ class FetcherAltPolicy(FetcherQueryPolicy):
             return action_idx, None
         else:
             return 4, None
-
-
 
 
 class FetcherYotamPolicy(FetcherQueryPolicy):
@@ -383,7 +378,7 @@ class FetcherYotamPolicy(FetcherQueryPolicy):
             if f_pos[1] <= t_pos[stn][1]:
                 tool_valid_actions[3] = 0  # Up
             valid_actions = logicalAnd(valid_actions, tool_valid_actions)
-        return valid_actions   
+        return valid_actions
 
 
 class GUI:
@@ -450,6 +445,10 @@ class GUI:
         self.scenario = current_scenrio
         self.iteration = current_repetition
         self.steps = 0
+
+        # button
+        self.button = [0, 0, self.width - 200, self.box_height, (255, 0, 0), "Click to reveal"]
+        self.button_clicked = False
 
         if (self.on_init() == False):
             self.running = False
@@ -583,25 +582,22 @@ class GUI:
         self.font = pygame.font.SysFont("lucidaconsole", 20)
         self.render_text("Steps: {}".format(self.steps), self.num_cols - 3, self.num_rows - 1)
 
-    # Button
+    #  Button
     def render_button(self):
-        x = 200
-        y = 200
-        width = 100
-        height = 50
-        color = (255, 0, 0)
-        text = "Reveal" 
+        x, y, w, h, color, txt = self.button
         # Draw the button
-        pygame.draw.rect(color, (x, y, width, height), 0)
-        font = pygame.font.SysFont('comicsans', 60)
-        text = font.render(self.text, 1, (0,0,0))
-        self.screen.blit(text, (self.x + round(self.width/2) - round(text.get_width()/2),
-                        self.y + round(self.height/2) - round(text.get_height()/2)))
+        pygame.draw.rect(self.screen, color, (x, y, w, h), 0)
+        font = pygame.font.SysFont('lucidaconsole', 20)
+        text = font.render(txt, 1, (0, 0, 0))
+        self.screen.blit(text, (x + round(w / 2) - round(text.get_width() / 2),
+                                y + round(h / 2) - round(text.get_height() / 2)))
+        pygame.draw.rect(self.screen, (0, 0, 0), (x, y, w, h), 5)
 
     def is_over_button(self, pos):
         # Pos is the mouse position or a tuple of (x,y) coordinates
-        if pos[0] > self.x and pos[0] < self.x + self.width:
-            if pos[1] > self.y and pos[1] < self.y + self.height:
+        x, y, w, h, color, txt = self.button
+        if pos[0] > x and pos[0] < x + w:
+            if pos[1] > y and pos[1] < y + h:
                 return True
         return False
 
@@ -613,6 +609,8 @@ class GUI:
         if "explanation" in self.condition:
             all_stations = list(range(len(self.stn_pos)))
             self.draw_explanation(self.condition, inferred_goals=all_stations)
+            if "button" in self.condition:
+                self.render_button()
 
         self.font = pygame.font.SysFont("lucidaconsole", int(self.height / self.num_cols * 0.35))
 
@@ -642,11 +640,7 @@ class GUI:
         if self.tutorial:
             text = "You don't need to go to the toolbox" if self.goal_stn == 0 else "You can move through stations"
             self.render_text(text, 0, 5, BLACK)
-        
-        # button
-        
 
-            
         pygame.display.flip()
 
     # Render drawing
@@ -687,9 +681,9 @@ class GUI:
                 self.draw_explanation(self.condition, inferred_goals)
                 self.font = pygame.font.SysFont("lucidaconsole",
                                                 int(self.height / self.num_cols * 0.35))
-                
-            # draw button
-                # self.button.draw()    
+                if "button" in self.condition and not self.button_clicked:
+                    # draw button
+                    self.render_button()
             pygame.display.flip()
 
     # Close pygame when finished
@@ -811,7 +805,7 @@ class GUI:
 
     # Move fetcher and get user action
     def on_execute(self, other_agent_move, inferred_goals):
-        self._move_agent(other_agent_move, inferred_goals)
+        t0 = time.time()
         action = None
 
         while self.running:
@@ -822,17 +816,24 @@ class GUI:
                 if e.type == pygame.KEYDOWN:
                     action = self.on_event(e)
 
-                # pos = pygame.mouse.get_pos()
-                # if e.type == pygame.MOUSEBUTTONDOWN:
-                #     if self.button.is_over(pos):
-                #         print("Button Clicked!")
-                             
+                if not self.pause_screen:
+                    pos = pygame.mouse.get_pos()
+                    if e.type == pygame.MOUSEBUTTONDOWN:
+                        if self.is_over_button(pos) and not self.button_clicked:
+                            self.button_clicked = True
+                            self.on_render(inferred_goals)
+                            print("{0:15} {1:15} {2:15f}".format(
+                                "Button Clicked!", " ", time.time() - t0)
+                            )
+
             else:
                 action = 5
                 time.sleep(0.2)  # yotam added
             # Got input, return action, worker_pos, and fetcher_pos
             if action != None:
                 self.steps += 1
+                self.button_clicked = False
+                self._move_agent(other_agent_move, inferred_goals)
                 self.on_render(inferred_goals)
                 return action, self.user, self.robot
 
@@ -844,20 +845,18 @@ def write_file(worker_action, fetcher_action, time):
     fetcher_actions = {0: "RIGHT", 1: "LEFT", 2: "UP", 3: "DOWN", 4: "NOOP", 6: "PICKUP"}
 
     print("{0:15} {1:15} {2:15f}".format(
-        worker_actions[worker_action],
-        fetcher_actions[fetcher_action],
-        time
-    )
+        worker_actions[worker_action], fetcher_actions[fetcher_action], time)
     )
 
 
 def run_exp(condition, tutorial=False):
     """Run the experiment"""
     print("date")  # Prints date to output file
+    print("Condition: ", condition)
     condition = EXP_CONDS[condition]
     repetitions = 3
     """ Environments: [Num Cols, Num Rows, Stations, Goal, Tool, Worker, Fetcher] """
-    exp = {"tutorial_"+tutorial: TUTORIALS[tutorial]} if tutorial else EXPERIMENTS
+    exp = {"tutorial_" + tutorial: TUTORIALS[tutorial]} if tutorial else EXPERIMENTS
 
     for i, scenario in enumerate(exp.items()):
         scenario_name, scenario_values = scenario
@@ -943,5 +942,5 @@ def run_exp(condition, tutorial=False):
 
 
 if __name__ == '__main__':
-    run_exp("VG", "2")
+    run_exp("VG_od", "1")
     print()
