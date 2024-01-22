@@ -447,7 +447,7 @@ class GUI:
         self.steps = 0
 
         # button
-        self.button = [0, 0, self.width - 200, self.box_height, (255, 0, 0), "Click to reveal"]
+        self.button = [0, 0, self.width - 200, self.box_height, (255, 0, 0), "Reveal Fetcher's Belief"]
         self.button_clicked = False
 
         if (self.on_init() == False):
@@ -942,5 +942,5 @@ def run_exp(condition, tutorial=False):
 
 
 if __name__ == '__main__':
-    run_exp("VG_od", "1")
+    # run_exp("VG_od", "1")
     print()
